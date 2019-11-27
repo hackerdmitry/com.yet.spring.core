@@ -26,7 +26,7 @@ public class DBLogger extends AbstractLogger {
     }
 
     public void init() {
-        createDBSchema();
+       // createDBSchema();
         createTableIfNotExists();
         updateEventAutoId();
     }
@@ -63,7 +63,7 @@ public class DBLogger extends AbstractLogger {
 
     private void createTableIfNotExists() {
         try {
-            jdbcTemplate.update("CREATE TABLE t_event (" + "id INT NOT NULL PRIMARY KEY," + "date TIMESTAMP,"
+            jdbcTemplate.update("CREATE TABLE if not EXISTS t_event (" + "id INT NOT NULL PRIMARY KEY," + "date TIMESTAMP,"
                     + "msg VARCHAR(255)" + ")");
 
             System.out.println("Created table t_event");
@@ -106,15 +106,12 @@ public class DBLogger extends AbstractLogger {
     }
 
     public List<Event> getAllEvents() {
-        List<Event> list = jdbcTemplate.query("select * from t_event", new RowMapper<Event>() {
-            @Override
-            public Event mapRow(ResultSet rs, int rowNum) throws SQLException {
-                Integer id = rs.getInt("id");
-                Date date = rs.getDate("date");
-                String msg = rs.getString("msg");
-                Event event = new Event(id, new Date(date.getTime()), msg);
-                return event;
-            }
+        List<Event> list = jdbcTemplate.query("select * from t_event", (rs, rowNum) -> {
+            Integer id = rs.getInt("id");
+            Date date = rs.getDate("date");
+            String msg = rs.getString("msg");
+            Event event = new Event(id, new Date(date.getTime()), msg);
+            return event;
         });
         return list;
     }

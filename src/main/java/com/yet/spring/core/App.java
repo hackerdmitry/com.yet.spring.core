@@ -23,13 +23,10 @@ public class App {
     
     public static void main(String[] args) {
         ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext(
-                "spring.xml", "loggers.xml", "aspects.xml", "db.xml");
+                "spring.xml", "aspects.xml");
         App app = (App) ctx.getBean("app");
         
         System.out.println(app.startupMessage);
-        
-        Client client = ctx.getBean(Client.class);
-        System.out.println("Client says: " + client.getGreeting());
         
         app.logEvents(ctx);
         
@@ -41,10 +38,10 @@ public class App {
         logEvent(EventType.INFO, event, "Some event for 1");
         
         event = ctx.getBean(Event.class);
-        logEvent(EventType.INFO, event, "One more event for 1");
+        logEvent(EventType.DEBUG, event, "One more event for 1");
         
         event = ctx.getBean(Event.class);
-        logEvent(EventType.INFO, event, "And one more event for 1");
+        logEvent(EventType.WARNING, event, "And one more event for 1");
         
         event = ctx.getBean(Event.class);
         logEvent(EventType.ERROR, event, "Some event for 2");
@@ -55,6 +52,7 @@ public class App {
     
     public App() {}
 
+
     public App(Client client, EventLogger eventLogger, Map<EventType, EventLogger> loggers) {
         super();
         this.client = client;
@@ -63,7 +61,7 @@ public class App {
     }
 
     private void logEvent(EventType eventType, Event event, String msg) {
-        String message = msg.replaceAll(client.getId(), client.getFullName());
+        String message = msg.replaceAll(client.getId(), client.getFullName() + " " + client.getCity());
         event.setMsg(message);
         
         EventLogger logger = loggers.get(eventType);
